@@ -158,7 +158,60 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+// 🔴 COLE AQUI O SEU CONFIG DO FIREBASE
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_AUTH_DOMAIN",
+  databaseURL: "SUA_DATABASE_URL",
+  projectId: "SEU_PROJECT_ID"
+};
+
+// inicia firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// elementos
+const messageInput = document.getElementById('message-input');
+const sendButton = document.getElementById('send-button');
+const chatMessages = document.getElementById('chat-messages');
+
+// ✅ ENVIAR mensagem
+function sendMessage() {
+    const text = messageInput.value.trim();
+
+    if (text !== "") {
+        push(ref(db, "mensagens"), {
+            texto: text
+        });
+
+        messageInput.value = "";
+    }
+}
+
+// ✅ RECEBER mensagem (tempo real)
+onChildAdded(ref(db, "mensagens"), (data) => {
+    const msg = data.val().texto;
+
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message', 'received');
+    messageElement.textContent = msg;
+
+    chatMessages.appendChild(messageElement);
+});
+
+// eventos
+sendButton.addEventListener('click', sendMessage);
+
+messageInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
+
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
         const chatMessages = document.getElementById('chat-messages');
